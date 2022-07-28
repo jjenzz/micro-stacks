@@ -181,25 +181,41 @@ export const ContractDeploy = () => {
 <Integrations.Solid>
 
 ```ts
+import { createSignal } from 'solid-js';
 import { useOpenContractDeploy } from '@micro-stacks/solidjs';
 
-const MyComponent = () => {
-  const { openStxTokenTransfer, isRequestPending } = useOpenContractDeploy();
+export const ContractDeploy = () => {
+  const { openContractDeploy, isRequestPending } = useOpenContractDeploy();
+  const [response, setResponse] = createSignal(null);
 
   const onClick = async () => {
     await openContractDeploy({
       contractName: `demo-deploy`,
       // the clarity contract above
       codeBody,
-      onFinish: data => {
+      onFinish: async data => {
         console.log('finished contract deploy!', data);
+        setResponse(data);
       },
       onCancel: () => {
         console.log('popup closed!');
       },
     });
   };
-  const buttonLabel = isRequestPending ? 'Loading...' : 'Sign transaction';
+
+  return (
+    <div>
+      <h4>Deploy a contract!</h4>
+      {response() && (
+        <pre>
+          <code>{JSON.stringify(response(), null, 2)}</code>
+        </pre>
+      )}
+      <button onClick={() => onClick()}>
+        {isRequestPending() ? 'request pending...' : 'Deploy a contract'}
+      </button>
+    </div>
+  );
 };
 ```
 
